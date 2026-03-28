@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropoly — Lead Intelligence</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a1a; min-height: 100vh; }
+  .topbar { background: #0A1628; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-brand span { color: #fff; font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
+  .topbar-sub { color: #00B4D8; font-size: 12px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+  .header-left h1 { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+  .header-left p { font-size: 13px; color: #666; margin-top: 4px; }
+  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; }
+  .run-btn { font-size: 13px; padding: 7px 18px; background: #0A1628; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-weight: 500; transition: background 0.15s; }
+  .run-btn:hover { background: #1a2d4a; }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  @media (max-width: 700px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  .metric { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; }
+  .metric-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .metric-value { font-size: 24px; font-weight: 500; color: #1a1a1a; }
+  .metric-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+  .tab { font-size: 13px; padding: 6px 14px; border: 1px solid #ddd; border-radius: 20px; background: #fff; color: #666; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .tab:hover { border-color: #aaa; color: #1a1a1a; }
+  .tab.active { background: #0A1628; border-color: #0A1628; color: #fff; }
+  .search-box { flex: 1; min-width: 180px; max-width: 280px; font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; outline: none; }
+  .search-box:focus { border-color: #00B4D8; }
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-bar { height: 3px; background: #e8e8e8; border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #00B4D8; border-radius: 2px; transition: width 0.3s; }
+  .progress-label { font-size: 12px; color: #888; }
+  .section-header { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+  .alert-banner { background: #fff5f5; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; }
+  .alert-banner-title { font-size: 13px; font-weight: 600; color: #dc2626; margin-bottom: 10px; }
+  .alert-item { font-size: 13px; color: #1a1a1a; padding: 6px 0; border-bottom: 1px solid #fee2e2; display: flex; gap: 10px; align-items: flex-start; }
+  .alert-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .alert-dot { width: 7px; height: 7px; border-radius: 50%; background: #dc2626; margin-top: 5px; flex-shrink: 0; }
+  .lead-grid { display: flex; flex-direction: column; gap: 12px; }
+  .lead-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; transition: border-color 0.15s; }
+  .lead-card:hover { border-color: #c0c0c0; }
+  .lead-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+  .lead-identity { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .lead-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .lead-meta { font-size: 12px; color: #888; margin-top: 3px; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .badge-hot { background: #fee2e2; color: #dc2626; }
+  .badge-warm { background: #fef3c7; color: #d97706; }
+  .badge-cold { background: #f3f4f6; color: #6b7280; }
+  .badge-cluster { background: #eff6ff; color: #2563eb; }
+  .lead-summary { font-size: 13px; color: #555; line-height: 1.65; margin-bottom: 10px; }
+  .score-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .score-label { font-size: 11px; color: #888; width: 65px; }
+  .score-track { flex: 1; height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; }
+  .score-pct { font-size: 11px; color: #888; width: 30px; text-align: right; }
+  .lead-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .signal-tag { font-size: 11px; padding: 3px 9px; background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 6px; color: #666; }
+  .lead-actions { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
+  .action-btn { font-size: 12px; padding: 5px 12px; border: 1px solid #ddd; border-radius: 7px; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; }
+  .action-btn:hover { background: #f8f9fa; color: #1a1a1a; border-color: #aaa; }
+  .action-btn-primary { background: #0A1628; color: #fff; border-color: #0A1628; }
+  .action-btn-primary:hover { background: #1a2d4a; border-color: #1a2d4a; color: #fff; }
+  .error-box { background: #fff5f5; border: 1px solid #fecaca; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+  .error-title { font-size: 13px; font-weight: 600; color: #dc2626; margin-bottom: 6px; }
+  .error-msg { font-size: 13px; color: #1a1a1a; margin-bottom: 12px; line-height: 1.5; }
+  .error-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .err-btn { font-size: 12px; padding: 6px 14px; border: 1px solid #fca5a5; border-radius: 7px; background: #fff; color: #dc2626; cursor: pointer; }
+  .err-btn:hover { background: #fee2e2; }
+  .err-btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .err-btn-primary:hover { background: #333; }
+  .partial-banner { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #92400e; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .empty-state { text-align: center; padding: 4rem 1rem; color: #888; background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; }
+  .empty-icon { font-size: 36px; margin-bottom: 14px; color: #ccc; }
+  .empty-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+  .empty-sub { font-size: 13px; color: #888; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .timestamp { font-size: 12px; color: #aaa; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span>TROPOLY</span>
+    <span class="topbar-sub">Lead Intelligence</span>
+  </div>
+  <span class="timestamp" id="last-run" style="color:#666;">Not yet run</span>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <h1>Lead intelligence dashboard</h1>
+      <p>218 leads across 4 clusters — powered by Claude</p>
+    </div>
+    <div class="header-right">
+      <select id="stream-select" onchange="renderLeads()">
+        <option value="24h">Last 24 hours</option>
+        <option value="30d" selected>Last 30 days</option>
+        <option value="90d">Last 90 days</option>
+        <option value="120d">Last 120 days</option>
+        <option value="365d">Last 365 days</option>
+      </select>
+      <button class="run-btn" id="run-btn" onclick="runBrief(false)">Run daily brief</button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value" id="m-total">218</div><div class="metric-sub">across 4 clusters</div></div>
+    <div class="metric"><div class="metric-label">Hot signals</div><div class="metric-value" id="m-hot" style="color:#dc2626;">—</div><div class="metric-sub">require action</div></div>
+    <div class="metric"><div class="metric-label">Warm signals</div><div class="metric-value" id="m-warm" style="color:#d97706;">—</div><div class="metric-sub">worth monitoring</div></div>
+    <div class="metric"><div class="metric-label">Red alerts</div><div class="metric-value" id="m-alerts" style="color:#dc2626;">—</div><div class="metric-sub">last 24 hours</div></div>
+  </div>
+
+  <div class="controls">
+    <button class="tab active" onclick="setCluster('all',this)">All clusters</button>
+    <button class="tab" onclick="setCluster('Cybersecurity + DeepTech',this)">Cyber + Deep Tech</button>
+    <button class="tab" onclick="setCluster('CleanTech + Energy + Mining',this)">CleanTech + Energy</button>
+    <button class="tab" onclick="setCluster('Industrial + Specialty B2B',this)">Industrial + B2B</button>
+    <button class="tab" onclick="setCluster('InsurTech + PropTech',this)">InsurTech + PropTech</button>
+    <input class="search-box" id="search-box" placeholder="Search leads..." oninput="renderLeads()">
+  </div>
+
+  <div id="progress-wrap" style="display:none;" class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <p class="progress-label" id="progress-label">Researching leads...</p>
+  </div>
+
+  <div id="error-container"></div>
+  <div id="partial-banner-container"></div>
+  <div id="alerts-section" style="display:none;margin-bottom:24px;"></div>
+
+  <div class="section-header" id="leads-header">Intelligence feed</div>
+  <div id="leads-container">
+    <div class="empty-state">
+      <div class="empty-icon">◎</div>
+      <div class="empty-title">Ready to run</div>
+      <div class="empty-sub">Click "Run daily brief" to research your 218 leads and generate intelligence scores.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = '/api/leads';
+const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+
+let allLeads = [], currentCluster = 'all', isRunning = false, failedBatches = [];
+
+const AVATARS = [
+  {bg:'#dbeafe',color:'#1d4ed8'},{bg:'#d1fae5',color:'#065f46'},
+  {bg:'#ede9fe',color:'#5b21b6'},{bg:'#fef3c7',color:'#92400e'},
+  {bg:'#fee2e2',color:'#991b1b'}
+];
+
+function avatarColor(n) {
+  let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xffffffff;
+  return AVATARS[Math.abs(h)%AVATARS.length];
+}
+function initials(f,l) { return ((f||'')[0]||'').toUpperCase()+((l||'')[0]||'').toUpperCase(); }
+function setCluster(c,el) { currentCluster=c; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); renderLeads(); }
+function setProgress(p,l) { document.getElementById('progress-fill').style.width=p+'%'; document.getElementById('progress-label').textContent=l; }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+function showError(title,msg,actions) {
+  document.getElementById('error-container').innerHTML=`<div class="error-box">
+    <div class="error-title">${title}</div><div class="error-msg">${msg}</div>
+    <div class="error-actions">${actions.map(a=>`<button class="err-btn ${a.primary?'err-btn-primary':''}" onclick="${a.fn}">${a.label}</button>`).join('')}</div>
+  </div>`;
+}
+function clearError() { document.getElementById('error-container').innerHTML=''; }
+function showPartialBanner(loaded,failed) {
+  document.getElementById('partial-banner-container').innerHTML=`<div class="partial-banner">
+    <span>${loaded} leads researched — ${failed} failed.</span>
+    <div style="display:flex;gap:8px;"><button class="err-btn" onclick="retryFailed()">Retry failed</button><button class="err-btn err-btn-primary" onclick="runBrief(false)">Restart</button></div>
+  </div>`;
+}
+function clearPartialBanner() { document.getElementById('partial-banner-container').innerHTML=''; }
+
+async function runBrief(retryOnly) {
+  if(isRunning) return;
+  isRunning=true; clearError(); clearPartialBanner();
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true; btn.textContent='Running...';
+  document.getElementById('progress-wrap').style.display='block';
+
+  let validLeads=[];
+
+  if(!retryOnly) {
+    allLeads=[]; failedBatches=[];
+    document.getElementById('leads-container').innerHTML=`<div class="empty-state"><span class="spinner"></span> Fetching lead data...</div>`;
+    setProgress(5,'Connecting to lead database...');
+    try {
+      const resp=await fetch(API_URL);
+      if(!resp.ok) throw new Error(`Server returned ${resp.status}`);
+      const data=await resp.json();
+      validLeads=data.filter(l=>l.firstName&&l.lastName&&l.company);
+      if(!validLeads.length) throw new Error('No leads returned. Check sheet tab names.');
+      setProgress(15,`Loaded ${validLeads.length} leads. Starting research...`);
+    } catch(err) {
+      document.getElementById('progress-wrap').style.display='none';
+      showError('Could not load lead data',err.message,[
+        {label:'Retry',fn:'runBrief(false)',primary:true},
+        {label:'Check /api/leads',fn:"window.open('/api/leads','_blank')"}
+      ]);
+      isRunning=false; btn.disabled=false; btn.textContent='Run daily brief'; return;
+    }
+  } else {
+    validLeads=failedBatches.flat(); failedBatches=[];
+    setProgress(10,`Retrying ${validLeads.length} leads...`);
+  }
+
+  const batchSize=10, batches=[];
+  for(let i=0;i<validLeads.length;i+=batchSize) batches.push(validLeads.slice(i,i+batchSize));
+  const stream=document.getElementById('stream-select').value;
+  let processed=0;
+
+  for(let bi=0;bi<batches.length;bi++) {
+    setProgress(Math.round(15+(bi/batches.length)*80),`Researching batch ${bi+1} of ${batches.length} (${processed} done)...`);
+    try {
+      const results=await researchBatch(batches[bi],stream);
+      allLeads.push(...results); processed+=batches[bi].length; renderLeads();
+    } catch(e) { failedBatches.push(batches[bi]); }
+    await sleep(150);
+  }
+
+  setProgress(100,'Complete.'); await sleep(400);
+  document.getElementById('progress-wrap').style.display='none';
+  if(failedBatches.length) showPartialBanner(allLeads.length,failedBatches.flat().length);
+  document.getElementById('last-run').textContent=`Last run: ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('m-total').textContent=allLeads.length;
+  renderLeads();
+  isRunning=false; btn.disabled=false; btn.textContent='Run daily brief';
+}
+
+async function retryFailed() { if(!failedBatches.length) return; clearPartialBanner(); await runBrief(true); }
+
+async function researchBatch(leads,stream) {
+  const tw={  '24h':'last 24 hours','30d':'last 30 days','90d':'last 90 days','120d':'last 4 months','365d':'last 12 months'}[stream]||'last 30 days';
+  const prompt=`You are an intelligence analyst for Tropoly, a B2B brand strategy and GTM consulting firm working with founders and CEOs in complex industries: cybersecurity, cleantech, energy, mining, industrial B2B, insurtech, proptech. Tropoly's core offering is a "Positioning Sprint" — a 2-week fixed-scope engagement.
+
+For each lead provide:
+1. 1-2 sentence summary: what company does, stage, signals relevant to Tropoly
+2. Engagement score: HOT (clear inflection — recent raise, new market, exec hire, rebrand, launch), WARM (some signals), COLD (none)
+3. 2-4 signal tags e.g. "Series A 2025", "Hiring CMO", "New market entry", "GTM gap visible"
+4. RED ALERT (hasAlert:true) only for major events in ${tw}: fundraise, acquisition, IPO, major launch, layoffs. Short alertText.
+
+Leads:
+${leads.map((l,i)=>`${i+1}. ${l.firstName} ${l.lastName} — ${l.title} at ${l.company} (${l.cluster})`).join('\n')}
+
+JSON array only, no markdown:
+[{"index":1,"summary":"...","engagementScore":"hot"|"warm"|"cold","signals":["..."],"hasAlert":false,"alertText":""}]`;
+
+  const resp=await fetch(CLAUDE_API,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+  if(!resp.ok) throw new Error(`API ${resp.status}`);
+  const data=await resp.json();
+  const text=data.content?.find(b=>b.type==='text')?.text||'[]';
+  const results=JSON.parse(text.replace(/```json|```/g,'').trim());
+  return leads.map((l,i)=>{
+    const r=results.find(x=>x.index===i+1)||{};
+    return{...l,summary:r.summary||`${l.title} at ${l.company}.`,engagementScore:r.engagementScore||'cold',signals:r.signals||[],hasAlert:r.hasAlert||false,alertText:r.alertText||''};
+  });
+}
+
+function renderLeads() {
+  const search=(document.getElementById('search-box').value||'').toLowerCase();
+  const stream=document.getElementById('stream-select').value;
+  let filtered=allLeads.filter(l=>{
+    if(currentCluster!=='all'&&l.cluster!==currentCluster) return false;
+    if(search&&!`${l.firstName} ${l.lastName} ${l.company} ${l.title}`.toLowerCase().includes(search)) return false;
+    if(stream==='24h'&&!l.hasAlert) return false;
+    return true;
+  }).sort((a,b)=>({hot:0,warm:1,cold:2}[a.engagementScore]??2)-({hot:0,warm:1,cold:2}[b.engagementScore]??2));
+
+  document.getElementById('m-hot').textContent=allLeads.filter(l=>l.engagementScore==='hot').length||'—';
+  document.getElementById('m-warm').textContent=allLeads.filter(l=>l.engagementScore==='warm').length||'—';
+  document.getElementById('m-alerts').textContent=allLeads.filter(l=>l.hasAlert).length||'—';
+  document.getElementById('leads-header').textContent=`Intelligence feed (${filtered.length} leads)`;
+
+  const alertLeads=allLeads.filter(l=>l.hasAlert);
+  const as=document.getElementById('alerts-section');
+  if(alertLeads.length){
+    as.style.display='block';
+    as.innerHTML=`<div class="section-header">Red alerts</div><div class="alert-banner">
+      <div class="alert-banner-title">⚑ ${alertLeads.length} material event${alertLeads.length>1?'s':''} detected</div>
+      ${alertLeads.map(l=>`<div class="alert-item"><div class="alert-dot"></div><div><strong>${l.firstName} ${l.lastName}</strong> · ${l.company} <span style="color:#888;font-size:12px;">— ${l.alertText}</span></div></div>`).join('')}
+    </div>`;
+  } else { as.style.display='none'; }
+
+  if(!allLeads.length) return;
+  if(!filtered.length){
+    document.getElementById('leads-container').innerHTML=`<div class="empty-state"><div class="empty-title">No leads match</div><div class="empty-sub">Try adjusting the cluster, search, or time window.</div></div>`;
+    return;
+  }
+
+  document.getElementById('leads-container').innerHTML=`<div class="lead-grid">${filtered.map(l=>{
+    const av=avatarColor(`${l.firstName}${l.lastName}`);
+    const sc=l.engagementScore==='hot'?'#dc2626':l.engagementScore==='warm'?'#d97706':'#9ca3af';
+    const sp=l.engagementScore==='hot'?85:l.engagementScore==='warm'?50:20;
+    const sf=s=>(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return `<div class="lead-card">
+      <div class="lead-top">
+        <div class="lead-identity">
+          <div class="avatar" style="background:${av.bg};color:${av.color};">${initials(l.firstName,l.lastName)}</div>
+          <div><div class="lead-name">${l.firstName} ${l.lastName}</div><div class="lead-meta">${l.title} · ${l.company}</div></div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-${l.engagementScore}">${l.engagementScore.toUpperCase()}</span>
+          <span class="badge badge-cluster">${(l.cluster||'').split(' ')[0]}</span>
+        </div>
+      </div>
+      <div class="lead-summary">${l.summary}</div>
+      <div class="score-bar">
+        <span class="score-label">Tropoly fit</span>
+        <div class="score-track"><div class="score-fill" style="width:${sp}%;background:${sc};"></div></div>
+        <span class="score-pct">${sp}%</span>
+      </div>
+      ${l.signals&&l.signals.length?`<div class="lead-signals">${l.signals.map(s=>`<span class="signal-tag">${s}</span>`).join('')}</div>`:''}
+      <div class="lead-actions">
+        <button class="action-btn action-btn-primary" onclick="draftMessage('${sf(l.firstName)}','${sf(l.lastName)}','${sf(l.title)}','${sf(l.company)}','${sf(l.summary)}')">Draft message</button>
+        <button class="action-btn" onclick="deepDive('${sf(l.company)}')">Deep dive</button>
+        ${l.linkedinUrl?`<a href="${l.linkedinUrl}" target="_blank" style="text-decoration:none;"><button class="action-btn">LinkedIn ↗</button></a>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function draftMessage(first,last,title,company,summary) {
+  const prompt=`Draft an outbound LinkedIn message to ${first} ${last}, ${title} at ${company}. Use the Tropoly messaging framework: one specific observation about their company, one direct question about their GTM or positioning challenge. No pitch, no mention of Tropoly yet. Keep it under 3 sentences. Context: ${summary}`;
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Draft Message</title><style>body{font-family:system-ui;max-width:600px;margin:60px auto;padding:0 24px;color:#1a1a1a;} h2{margin-bottom:16px;} p{font-size:15px;line-height:1.7;background:#f8f9fa;padding:20px;border-radius:8px;border:1px solid #e8e8e8;} .note{font-size:12px;color:#888;margin-top:12px;}</style></head><body><h2>Drafting message for ${first} ${last}...</h2><p id="msg">Loading...</p><p class="note">Edit and send directly from LinkedIn.</p><script>
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:${JSON.stringify(prompt)}}]})})
+    .then(r=>r.json()).then(d=>{document.getElementById('msg').textContent=d.content[0].text;}).catch(e=>{document.getElementById('msg').textContent='Error: '+e.message;});
+  <\/script></body></html>`);
+}
+
+function deepDive(company) {
+  const win=window.open('','_blank');
+  const prompt=`Give me a deep intelligence brief on ${company} for Tropoly. Cover: what they do, their market position, funding history, recent news or signals, likely GTM challenges, and why Tropoly's Positioning Sprint would be relevant right now. Be specific and actionable.`;
+  win.document.write(`<!DOCTYPE html><html><head><title>Deep Dive: ${company}</title><style>body{font-family:system-ui;max-width:700px;margin:60px auto;padding:0 24px;color:#1a1a1a;line-height:1.7;} h2{margin-bottom:16px;} #content{font-size:14px;white-space:pre-wrap;}</style></head><body><h2>Deep dive: ${company}</h2><div id="content">Loading...</div><script>
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:${JSON.stringify(prompt)}}]})})
+    .then(r=>r.json()).then(d=>{document.getElementById('content').textContent=d.content[0].text;}).catch(e=>{document.getElementById('content').textContent='Error: '+e.message;});
+  <\/script></body></html>`);
+}
+</script>
+</body>
+</html>
