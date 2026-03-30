@@ -5,124 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tropoly — Lead Intelligence</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a1a; min-height: 100vh; }
+body { font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
 
-/* ── TOPBAR with Tropoly branding ── */
-.topbar { background: #0A1628; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
-.topbar-brand { display: flex; align-items: center; gap: 12px; }
+/* ── TOPBAR ── */
+.topbar { background: #0A1628; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 54px; border-bottom: 1px solid rgba(0,180,216,0.2); }
+.topbar-brand { display: flex; align-items: center; gap: 14px; }
 .tropoly-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.tropoly-icon { width: 28px; height: 28px; flex-shrink: 0; }
-.tropoly-wordmark { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-.topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
-.topbar-sub { color: #00B4D8; font-size: 12px; font-weight: 400; letter-spacing: 0.04em; }
-.timestamp { font-size: 12px; color: #666; }
+.tropoly-wordmark { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+.topbar-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.2); }
+.topbar-sub { color: #00B4D8; font-size: 11px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+.timestamp { font-size: 11px; color: #4a5568; letter-spacing: 0.02em; }
 
-.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
-.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
-.header-left h1 { font-size: 22px; font-weight: 500; }
-.header-left p { font-size: 13px; color: #666; margin-top: 4px; }
+.container { max-width: 1140px; margin: 0 auto; padding: 28px 24px; }
+
+/* ── HEADER ── */
+.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.header-left h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.header-left p { font-size: 12px; color: #718096; margin-top: 4px; }
 .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; }
-.run-btn { font-size: 13px; padding: 7px 18px; background: #0A1628; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-weight: 500; }
-.run-btn:hover { background: #1a2d4a; }
+select { font-family: 'Sora', sans-serif; font-size: 12px; padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; }
+.run-btn { font-family: 'Sora', sans-serif; font-size: 12px; padding: 8px 20px; background: #0A1628; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-weight: 600; letter-spacing: 0.04em; transition: background 0.15s; }
+.run-btn:hover { background: #162236; }
 .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
-@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr);}}
-.metric { background:#fff; border:1px solid #e8e8e8; border-radius:10px; padding:16px; }
-.metric-label { font-size:12px; color:#888; margin-bottom:6px; }
-.metric-value { font-size:24px; font-weight:500; }
-.metric-sub { font-size:11px; color:#aaa; margin-top:4px; }
 
-/* ── CONTROLS ── */
-.controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:20px; }
-.tab { font-size:13px; padding:6px 14px; border:1px solid #ddd; border-radius:20px; background:#fff; color:#666; cursor:pointer; white-space:nowrap; }
-.tab.active { background:#0A1628; border-color:#0A1628; color:#fff; }
-.search-box { flex:1; min-width:180px; max-width:220px; font-size:13px; padding:7px 12px; border:1px solid #ddd; border-radius:8px; background:#fff; color:#1a1a1a; outline:none; }
-.search-box:focus { border-color:#00B4D8; }
+/* ── METRICS ── */
+.metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr);}}
+.metric { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px; cursor: pointer; transition: all 0.15s; user-select: none; }
+.metric:hover { border-color: #00B4D8; box-shadow: 0 0 0 3px rgba(0,180,216,0.08); }
+.metric.active { border-color: #00B4D8; background: #f0fafe; box-shadow: 0 0 0 3px rgba(0,180,216,0.12); }
+.metric-label { font-size: 11px; color: #718096; margin-bottom: 6px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.metric-value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.metric-sub { font-size: 11px; color: #a0aec0; margin-top: 4px; }
+.metric-active-label { font-size: 10px; color: #00B4D8; font-weight: 600; margin-top: 6px; letter-spacing: 0.04em; display: none; }
+.metric.active .metric-active-label { display: block; }
+
+/* ── FILTER BAR ── */
+.filter-bar { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; }
+.filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filter-label { font-size: 11px; color: #718096; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; min-width: 60px; flex-shrink: 0; }
+.filter-chip { font-size: 11px; padding: 5px 13px; border: 1px solid #e2e8f0; border-radius: 20px; background: #f8fafc; color: #4a5568; cursor: pointer; white-space: nowrap; transition: all 0.12s; font-family: 'Sora', sans-serif; font-weight: 500; }
+.filter-chip:hover { border-color: #0A1628; color: #0A1628; background: #f0f4f8; }
+.filter-chip.active { background: #0A1628; border-color: #0A1628; color: #fff; }
+.filter-chip.active:hover { background: #162236; }
+.filter-divider { width: 100%; height: 1px; background: #f0f2f5; }
+.filter-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.search-box { flex: 1; min-width: 200px; max-width: 280px; font-family: 'Sora', sans-serif; font-size: 12px; padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #1a1a1a; outline: none; }
+.search-box:focus { border-color: #00B4D8; background: #fff; }
+.clear-btn { font-family: 'Sora', sans-serif; font-size: 11px; padding: 5px 13px; border: 1px solid #e2e8f0; border-radius: 20px; background: #fff; color: #718096; cursor: pointer; font-weight: 500; transition: all 0.12s; }
+.clear-btn:hover { border-color: #e53e3e; color: #e53e3e; background: #fff5f5; }
 
 /* ── SORT CONTROLS ── */
-.sort-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:20px; padding:10px 14px; background:#fff; border:1px solid #e8e8e8; border-radius:10px; }
-.sort-label { font-size:12px; color:#888; font-weight:500; white-space:nowrap; }
-.sort-btn { font-size:12px; padding:5px 12px; border:1px solid #ddd; border-radius:16px; background:#fff; color:#666; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:5px; }
-.sort-btn.active { background:#0A1628; border-color:#0A1628; color:#fff; }
-.sort-btn:hover:not(.active) { background:#f8f9fa; border-color:#aaa; }
+.sort-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-/* ── STATUS FILTER PILLS ── */
-.status-filter-row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
-.status-filter-label { font-size:12px; color:#888; font-weight:500; }
-.status-pill { font-size:11px; padding:4px 11px; border-radius:20px; border:1px solid #ddd; background:#fff; color:#666; cursor:pointer; white-space:nowrap; }
-.status-pill.active { border-color:#0A1628; background:#0A1628; color:#fff; }
-.status-pill:hover:not(.active) { background:#f3f4f6; }
+/* ── PROGRESS ── */
+.progress-wrap { margin-bottom: 16px; }
+.progress-bar { height: 3px; background: #e2e8f0; border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #0A1628, #00B4D8); border-radius: 2px; transition: width 0.3s; }
+.progress-label { font-size: 11px; color: #718096; }
 
-.progress-wrap { margin-bottom:20px; }
-.progress-bar { height:3px; background:#e8e8e8; border-radius:2px; margin-bottom:8px; overflow:hidden; }
-.progress-fill { height:100%; background:#00B4D8; border-radius:2px; transition:width 0.3s; }
-.progress-label { font-size:12px; color:#888; }
-.section-header { font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #eee; }
-.alert-banner { background:#fff5f5; border:1px solid #fecaca; border-radius:10px; padding:14px 18px; margin-bottom:24px; }
-.alert-banner-title { font-size:13px; font-weight:600; color:#dc2626; margin-bottom:10px; }
-.alert-item { font-size:13px; padding:6px 0; border-bottom:1px solid #fee2e2; display:flex; gap:10px; align-items:flex-start; }
-.alert-item:last-child { border-bottom:none; padding-bottom:0; }
-.alert-dot { width:7px; height:7px; border-radius:50%; background:#dc2626; margin-top:5px; flex-shrink:0; }
-.lead-grid { display:flex; flex-direction:column; gap:12px; }
-.lead-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:18px 20px; }
-.lead-card:hover { border-color:#c0c0c0; }
-.lead-top { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:10px; }
-.lead-identity { display:flex; align-items:center; gap:12px; }
-.avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; flex-shrink:0; }
-.lead-name { font-size:14px; font-weight:600; }
-.lead-meta { font-size:12px; color:#888; margin-top:3px; }
-.badges { display:flex; gap:6px; flex-wrap:wrap; align-items:center; flex-shrink:0; }
-.badge { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; }
-.badge-hot { background:#fee2e2; color:#dc2626; }
-.badge-warm { background:#fef3c7; color:#d97706; }
-.badge-cold { background:#f3f4f6; color:#6b7280; }
-.badge-cluster { background:#eff6ff; color:#2563eb; }
+.section-header { font-size: 11px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #edf2f7; }
+
+/* ── ALERTS ── */
+.alert-banner { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
+.alert-banner-title { font-size: 12px; font-weight: 600; color: #c53030; margin-bottom: 10px; }
+.alert-item { font-size: 12px; padding: 6px 0; border-bottom: 1px solid #fee2e2; display: flex; gap: 10px; align-items: flex-start; }
+.alert-item:last-child { border-bottom: none; padding-bottom: 0; }
+.alert-dot { width: 6px; height: 6px; border-radius: 50%; background: #e53e3e; margin-top: 5px; flex-shrink: 0; }
+
+/* ── LEAD CARDS ── */
+.lead-grid { display: flex; flex-direction: column; gap: 10px; }
+.lead-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; transition: border-color 0.12s; }
+.lead-card:hover { border-color: #cbd5e0; }
+.lead-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+.lead-identity { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; letter-spacing: 0.02em; }
+.lead-name { font-size: 13px; font-weight: 600; }
+.lead-meta { font-size: 11px; color: #718096; margin-top: 3px; }
+.badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+.badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-hot { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+.badge-warm { background: #fffbeb; color: #b7791f; border: 1px solid #fef3c7; }
+.badge-cold { background: #f7fafc; color: #718096; border: 1px solid #e2e8f0; }
+.badge-cluster { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; font-weight: 500; text-transform: none; font-size: 10px; }
 
 /* ── PIPELINE STATUS BADGE ── */
-.badge-status { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:500; }
-.status-not-started { background:#f3f4f6; color:#6b7280; }
-.status-contacted { background:#dbeafe; color:#1d4ed8; }
-.status-responded { background:#d1fae5; color:#065f46; }
-.status-qualified { background:#ede9fe; color:#5b21b6; }
-.status-sprint-proposed { background:#fef3c7; color:#92400e; }
-.status-in-negotiation { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
-.status-client { background:#dcfce7; color:#14532d; border:1px solid #86efac; }
-.status-not-interested { background:#fee2e2; color:#991b1b; }
-.status-no-response { background:#f1f5f9; color:#475569; }
+.badge-status { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 600; letter-spacing: 0.02em; border: 1px solid transparent; }
+.status-not-started { background: #f7fafc; color: #718096; border-color: #e2e8f0; }
+.status-contacted { background: #ebf8ff; color: #2c5282; border-color: #bee3f8; }
+.status-responded { background: #e6fffa; color: #065f46; border-color: #81e6d9; }
+.status-qualified { background: #faf5ff; color: #553c9a; border-color: #d6bcfa; }
+.status-sprint-proposed { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.status-in-negotiation { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.status-client { background: #f0fff4; color: #14532d; border-color: #9ae6b4; }
+.status-not-interested { background: #fff5f5; color: #9b2c2c; border-color: #feb2b2; }
+.status-no-response { background: #f7fafc; color: #4a5568; border-color: #e2e8f0; }
 
-.lead-summary { font-size:13px; color:#555; line-height:1.65; margin-bottom:10px; }
-.score-bar { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.score-label { font-size:11px; color:#888; width:65px; }
-.score-track { flex:1; height:4px; background:#f0f0f0; border-radius:2px; overflow:hidden; }
-.score-fill { height:100%; border-radius:2px; }
-.score-pct { font-size:11px; color:#888; width:30px; text-align:right; }
-.lead-signals { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-.signal-tag { font-size:11px; padding:3px 9px; background:#f8f9fa; border:1px solid #e8e8e8; border-radius:6px; color:#666; }
-.lead-actions { display:flex; gap:8px; padding-top:10px; border-top:1px solid #f0f0f0; flex-wrap:wrap; }
-.action-btn { font-size:12px; padding:5px 12px; border:1px solid #ddd; border-radius:7px; background:#fff; color:#555; cursor:pointer; }
-.action-btn:hover { background:#f8f9fa; color:#1a1a1a; border-color:#aaa; }
-.action-btn-primary { background:#0A1628; color:#fff; border-color:#0A1628; }
-.action-btn-primary:hover { background:#1a2d4a; color:#fff; }
-.error-box { background:#fff5f5; border:1px solid #fecaca; border-radius:10px; padding:16px 18px; margin-bottom:16px; }
-.error-title { font-size:13px; font-weight:600; color:#dc2626; margin-bottom:6px; }
-.error-msg { font-size:13px; margin-bottom:12px; line-height:1.5; }
-.error-actions { display:flex; gap:8px; flex-wrap:wrap; }
-.err-btn { font-size:12px; padding:6px 14px; border:1px solid #fca5a5; border-radius:7px; background:#fff; color:#dc2626; cursor:pointer; }
-.err-btn-primary { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
-.partial-banner { background:#fffbeb; border:1px solid #fcd34d; border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#92400e; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.empty-state { text-align:center; padding:4rem 1rem; background:#fff; border:1px solid #e8e8e8; border-radius:12px; }
-.empty-title { font-size:15px; font-weight:600; margin-bottom:8px; }
-.empty-sub { font-size:13px; color:#888; }
-.spinner { display:inline-block; width:14px; height:14px; border:2px solid #ddd; border-top-color:#888; border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:8px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:24px; }
-.modal { background:#fff; border-radius:14px; padding:28px; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; }
-.modal-title { font-size:16px; font-weight:600; margin-bottom:6px; }
-.modal-sub { font-size:13px; color:#888; margin-bottom:20px; }
-.modal-body { font-size:14px; line-height:1.7; color:#333; white-space:pre-wrap; }
-.modal-close { float:right; font-size:13px; padding:5px 12px; border:1px solid #ddd; border-radius:7px; background:#fff; cursor:pointer; }
+.lead-summary { font-size: 12px; color: #4a5568; line-height: 1.7; margin-bottom: 10px; }
+.score-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.score-label { font-size: 10px; color: #a0aec0; width: 60px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.score-track { flex: 1; height: 3px; background: #edf2f7; border-radius: 2px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 2px; }
+.score-pct { font-size: 10px; color: #a0aec0; width: 28px; text-align: right; }
+.lead-signals { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.signal-tag { font-size: 10px; padding: 3px 9px; background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; color: #4a5568; }
+.lead-actions { display: flex; gap: 7px; padding-top: 10px; border-top: 1px solid #f7fafc; flex-wrap: wrap; }
+.action-btn { font-family: 'Sora', sans-serif; font-size: 11px; padding: 5px 12px; border: 1px solid #e2e8f0; border-radius: 7px; background: #fff; color: #4a5568; cursor: pointer; font-weight: 500; transition: all 0.12s; }
+.action-btn:hover { background: #f7fafc; color: #1a1a1a; border-color: #a0aec0; }
+.action-btn-primary { background: #0A1628; color: #fff; border-color: #0A1628; }
+.action-btn-primary:hover { background: #162236; color: #fff; border-color: #162236; }
+
+/* ── ERRORS / BANNERS ── */
+.error-box { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+.error-title { font-size: 12px; font-weight: 600; color: #c53030; margin-bottom: 6px; }
+.error-msg { font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
+.error-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.err-btn { font-family: 'Sora', sans-serif; font-size: 11px; padding: 6px 14px; border: 1px solid #feb2b2; border-radius: 7px; background: #fff; color: #c53030; cursor: pointer; }
+.err-btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.partial-banner { background: #fffbeb; border: 1px solid #f6e05e; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; font-size: 12px; color: #744210; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.empty-state { text-align: center; padding: 4rem 1rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+.empty-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.empty-sub { font-size: 12px; color: #718096; }
+.spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #e2e8f0; border-top-color: #718096; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 7px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
+.modal { background: #fff; border-radius: 14px; padding: 28px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+.modal-sub { font-size: 12px; color: #718096; margin-bottom: 20px; }
+.modal-body { font-size: 13px; line-height: 1.75; color: #2d3748; white-space: pre-wrap; }
+.modal-close { float: right; font-family: 'Sora', sans-serif; font-size: 11px; padding: 5px 12px; border: 1px solid #e2e8f0; border-radius: 7px; background: #fff; cursor: pointer; color: #718096; }
 </style>
 </head>
 <body>
@@ -131,11 +147,11 @@ select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radi
 <div class="topbar">
   <div class="topbar-brand">
     <a class="tropoly-logo" href="https://tropoly.io" target="_blank">
-      <!-- Tropoly T icon -->
-      <svg class="tropoly-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" fill="none" stroke="#00B4D8" stroke-width="1.5"/>
-        <polygon points="16,7 25,12 25,20 16,25 7,20 7,12" fill="none" stroke="#00B4D8" stroke-width="1" opacity="0.5"/>
-        <text x="16" y="21" text-anchor="middle" font-family="Arial" font-weight="700" font-size="12" fill="#ffffff">T</text>
+      <!-- Tropoly hexagonal icon -->
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 1L24 7V19L13 25L2 19V7L13 1Z" stroke="#00B4D8" stroke-width="1.5" fill="none"/>
+        <path d="M13 5.5L20.5 9.75V18.25L13 22.5L5.5 18.25V9.75L13 5.5Z" stroke="#00B4D8" stroke-width="0.75" fill="none" opacity="0.45"/>
+        <path d="M9.5 9.5H16.5M13 9.5V17" stroke="#ffffff" stroke-width="1.75" stroke-linecap="round"/>
       </svg>
       <span class="tropoly-wordmark">TROPOLY</span>
     </a>
@@ -148,8 +164,8 @@ select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radi
 <div class="container">
   <div class="header">
     <div class="header-left">
-      <h1>Lead intelligence dashboard</h1>
-      <p>218 leads across 4 clusters — powered by Claude</p>
+      <h1>Lead intelligence</h1>
+      <p id="leads-count-sub">218 leads across 4 clusters — powered by Claude</p>
     </div>
     <div class="header-right">
       <select id="stream-select" onchange="renderLeads()">
@@ -163,46 +179,78 @@ select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radi
     </div>
   </div>
 
-  <!-- Metrics -->
+  <!-- ── METRICS (clickable filters) ── -->
   <div class="metrics">
-    <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value" id="m-total">218</div><div class="metric-sub">across 4 clusters</div></div>
-    <div class="metric"><div class="metric-label">Hot signals</div><div class="metric-value" id="m-hot" style="color:#dc2626;">—</div><div class="metric-sub">require action</div></div>
-    <div class="metric"><div class="metric-label">Warm signals</div><div class="metric-value" id="m-warm" style="color:#d97706;">—</div><div class="metric-sub">worth monitoring</div></div>
-    <div class="metric"><div class="metric-label">Red alerts</div><div class="metric-value" id="m-alerts" style="color:#dc2626;">—</div><div class="metric-sub">last 24 hours</div></div>
+    <div class="metric" id="metric-total" onclick="toggleMetric('total')">
+      <div class="metric-label">Total leads</div>
+      <div class="metric-value" id="m-total">218</div>
+      <div class="metric-sub">across 4 clusters</div>
+    </div>
+    <div class="metric" id="metric-hot" onclick="toggleMetric('hot')">
+      <div class="metric-label">Hot signals</div>
+      <div class="metric-value" id="m-hot" style="color:#c53030;">—</div>
+      <div class="metric-sub">require action</div>
+      <div class="metric-active-label">▲ Filtering active</div>
+    </div>
+    <div class="metric" id="metric-warm" onclick="toggleMetric('warm')">
+      <div class="metric-label">Warm signals</div>
+      <div class="metric-value" id="m-warm" style="color:#b7791f;">—</div>
+      <div class="metric-sub">worth monitoring</div>
+      <div class="metric-active-label">▲ Filtering active</div>
+    </div>
+    <div class="metric" id="metric-alerts" onclick="toggleMetric('alerts')">
+      <div class="metric-label">Red alerts</div>
+      <div class="metric-value" id="m-alerts" style="color:#c53030;">—</div>
+      <div class="metric-sub">last 24 hours</div>
+      <div class="metric-active-label">▲ Filtering active</div>
+    </div>
   </div>
 
-  <!-- Cluster tabs + search -->
-  <div class="controls">
-    <button class="tab active" onclick="setCluster('all',this)">All clusters</button>
-    <button class="tab" onclick="setCluster('Cybersecurity + DeepTech',this)">Cyber + Deep Tech</button>
-    <button class="tab" onclick="setCluster('CleanTech + Energy + Mining',this)">CleanTech + Energy</button>
-    <button class="tab" onclick="setCluster('Industrial + Specialty B2B',this)">Industrial + B2B</button>
-    <button class="tab" onclick="setCluster('InsurTech + PropTech',this)">InsurTech + PropTech</button>
-    <input class="search-box" id="search-box" placeholder="Search leads..." oninput="renderLeads()">
-  </div>
+  <!-- ── FILTER BAR ── -->
+  <div class="filter-bar" id="filter-bar">
+    <!-- Cluster row -->
+    <div class="filter-row">
+      <span class="filter-label">Cluster</span>
+      <button class="filter-chip active" data-group="cluster" data-value="all" onclick="setFilter('cluster','all',this)">All</button>
+      <button class="filter-chip" data-group="cluster" data-value="Cybersecurity + DeepTech" onclick="setFilter('cluster','Cybersecurity + DeepTech',this)">Cyber + Deep Tech</button>
+      <button class="filter-chip" data-group="cluster" data-value="CleanTech + Energy + Mining" onclick="setFilter('cluster','CleanTech + Energy + Mining',this)">CleanTech + Energy</button>
+      <button class="filter-chip" data-group="cluster" data-value="Industrial + Specialty B2B" onclick="setFilter('cluster','Industrial + Specialty B2B',this)">Industrial + B2B</button>
+      <button class="filter-chip" data-group="cluster" data-value="InsurTech + PropTech" onclick="setFilter('cluster','InsurTech + PropTech',this)">InsurTech + PropTech</button>
+    </div>
 
-  <!-- Sort + Signal filter controls -->
-  <div class="sort-controls">
-    <span class="sort-label">Sort by:</span>
-    <button class="sort-btn active" id="sort-signal" onclick="setSort('signal',this)">🔥 Signal (Hot → Cold)</button>
-    <button class="sort-btn" id="sort-signal-rev" onclick="setSort('signal-rev',this)">❄️ Signal (Cold → Hot)</button>
-    <button class="sort-btn" id="sort-status" onclick="setSort('status',this)">📋 Pipeline Status</button>
-    <button class="sort-btn" id="sort-alpha" onclick="setSort('alpha',this)">A→Z Company</button>
-  </div>
+    <div class="filter-divider"></div>
 
-  <!-- Status filter pills (shown after data loads) -->
-  <div class="status-filter-row" id="status-filter-row" style="display:none;">
-    <span class="status-filter-label">Status:</span>
-    <button class="status-pill active" onclick="setStatusFilter('all',this)">All</button>
-    <button class="status-pill" onclick="setStatusFilter('Not Started',this)">Not Started</button>
-    <button class="status-pill" onclick="setStatusFilter('Contacted',this)">Contacted</button>
-    <button class="status-pill" onclick="setStatusFilter('Responded',this)">Responded</button>
-    <button class="status-pill" onclick="setStatusFilter('Qualified',this)">Qualified</button>
-    <button class="status-pill" onclick="setStatusFilter('Sprint Proposed',this)">Sprint Proposed</button>
-    <button class="status-pill" onclick="setStatusFilter('In Negotiation',this)">In Negotiation</button>
-    <button class="status-pill" onclick="setStatusFilter('Client',this)">Client</button>
-    <button class="status-pill" onclick="setStatusFilter('Not Interested',this)">Not Interested</button>
-    <button class="status-pill" onclick="setStatusFilter('No Response',this)">No Response</button>
+    <!-- Status row -->
+    <div class="filter-row">
+      <span class="filter-label">Status</span>
+      <button class="filter-chip active" data-group="status" data-value="all" onclick="setFilter('status','all',this)">All</button>
+      <button class="filter-chip" data-group="status" data-value="Not Started" onclick="setFilter('status','Not Started',this)">Not Started</button>
+      <button class="filter-chip" data-group="status" data-value="Contacted" onclick="setFilter('status','Contacted',this)">Contacted</button>
+      <button class="filter-chip" data-group="status" data-value="Responded" onclick="setFilter('status','Responded',this)">Responded</button>
+      <button class="filter-chip" data-group="status" data-value="Qualified" onclick="setFilter('status','Qualified',this)">Qualified</button>
+      <button class="filter-chip" data-group="status" data-value="Sprint Proposed" onclick="setFilter('status','Sprint Proposed',this)">Sprint Proposed</button>
+      <button class="filter-chip" data-group="status" data-value="In Negotiation" onclick="setFilter('status','In Negotiation',this)">In Negotiation</button>
+      <button class="filter-chip" data-group="status" data-value="Client" onclick="setFilter('status','Client',this)">Client</button>
+      <button class="filter-chip" data-group="status" data-value="Not Interested" onclick="setFilter('status','Not Interested',this)">Not Interested</button>
+      <button class="filter-chip" data-group="status" data-value="No Response" onclick="setFilter('status','No Response',this)">No Response</button>
+    </div>
+
+    <div class="filter-divider"></div>
+
+    <!-- Sort + Search row -->
+    <div class="filter-actions">
+      <div class="sort-row">
+        <span class="filter-label">Sort</span>
+        <button class="filter-chip active" data-group="sort" data-value="signal" onclick="setFilter('sort','signal',this)">🔥 Hot → Cold</button>
+        <button class="filter-chip" data-group="sort" data-value="signal-rev" onclick="setFilter('sort','signal-rev',this)">❄️ Cold → Hot</button>
+        <button class="filter-chip" data-group="sort" data-value="status" onclick="setFilter('sort','status',this)">📋 Pipeline Stage</button>
+        <button class="filter-chip" data-group="sort" data-value="alpha" onclick="setFilter('sort','alpha',this)">A→Z</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="search-box" id="search-box" placeholder="Search leads..." oninput="renderLeads()">
+        <button class="clear-btn" onclick="clearAllFilters()">✕ Clear all</button>
+      </div>
+    </div>
   </div>
 
   <div id="progress-wrap" style="display:none;" class="progress-wrap">
@@ -211,10 +259,13 @@ select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radi
   </div>
   <div id="error-container"></div>
   <div id="partial-banner-container"></div>
-  <div id="alerts-section" style="display:none;margin-bottom:24px;"></div>
+  <div id="alerts-section" style="display:none;margin-bottom:20px;"></div>
   <div class="section-header" id="leads-header">Intelligence feed</div>
   <div id="leads-container">
-    <div class="empty-state"><div class="empty-title">Ready to run</div><div class="empty-sub">Click "Run daily brief" to research your leads.</div></div>
+    <div class="empty-state">
+      <div class="empty-title">Ready to run</div>
+      <div class="empty-sub">Click "Run daily brief" to research your leads.</div>
+    </div>
   </div>
 </div>
 
@@ -222,13 +273,65 @@ select { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radi
 
 <script>
 const LEADS_API='/api/leads', CLAUDE_API='/api/claude';
-let allLeads=[], currentCluster='all', currentSort='signal', currentStatusFilter='all', isRunning=false, failedBatches=[];
-const AVATARS=[{bg:'#dbeafe',color:'#1d4ed8'},{bg:'#d1fae5',color:'#065f46'},{bg:'#ede9fe',color:'#5b21b6'},{bg:'#fef3c7',color:'#92400e'},{bg:'#fee2e2',color:'#991b1b'}];
+
+// ── STATE ──
+let allLeads = [], isRunning = false, failedBatches = [];
+let filters = { cluster: 'all', status: 'all', sort: 'signal', signal: null }; // signal: null|'hot'|'warm'|'alerts'
+
+const AVATARS = [
+  {bg:'#dbeafe',color:'#1d4ed8'},{bg:'#d1fae5',color:'#065f46'},
+  {bg:'#ede9fe',color:'#5b21b6'},{bg:'#fef3c7',color:'#92400e'},
+  {bg:'#fee2e2',color:'#991b1b'},{bg:'#fce7f3',color:'#9d174d'}
+];
 function avatarColor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffffffff;return AVATARS[Math.abs(h)%AVATARS.length];}
 function initials(f,l){return((f||'')[0]||'').toUpperCase()+((l||'')[0]||'').toUpperCase();}
-function setCluster(c,el){currentCluster=c;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderLeads();}
-function setSort(s,el){currentSort=s;document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderLeads();}
-function setStatusFilter(s,el){currentStatusFilter=s;document.querySelectorAll('.status-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderLeads();}
+
+// ── FILTER LOGIC ──
+function setFilter(group, value, el) {
+  filters[group] = value;
+  // Update active chip in this group
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderLeads();
+}
+
+function toggleMetric(type) {
+  if (type === 'total') {
+    // Clear signal filter
+    filters.signal = null;
+    document.getElementById('metric-total').classList.remove('active');
+    document.getElementById('metric-hot').classList.remove('active');
+    document.getElementById('metric-warm').classList.remove('active');
+    document.getElementById('metric-alerts').classList.remove('active');
+  } else if (type === 'hot') {
+    filters.signal = filters.signal === 'hot' ? null : 'hot';
+  } else if (type === 'warm') {
+    filters.signal = filters.signal === 'warm' ? null : 'warm';
+  } else if (type === 'alerts') {
+    filters.signal = filters.signal === 'alerts' ? null : 'alerts';
+  }
+  // Update metric card styles
+  ['hot','warm','alerts'].forEach(t => {
+    document.getElementById(`metric-${t}`).classList.toggle('active', filters.signal === t);
+  });
+  renderLeads();
+}
+
+function clearAllFilters() {
+  filters = { cluster: 'all', status: 'all', sort: 'signal', signal: null };
+  document.querySelectorAll('.filter-chip[data-value="all"]').forEach(b => b.classList.add('active'));
+  document.querySelectorAll('.filter-chip:not([data-value="all"])').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-chip[data-value="signal"]').forEach(b => b.classList.add('active'));
+  // Reset sort to signal
+  document.querySelectorAll('[data-group="sort"]').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-group="sort"][data-value="signal"]').classList.add('active');
+  // Clear metric active states
+  document.querySelectorAll('.metric').forEach(m => m.classList.remove('active'));
+  document.getElementById('search-box').value = '';
+  renderLeads();
+}
+
+// ── HELPERS ──
 function setProgress(p,l){document.getElementById('progress-fill').style.width=p+'%';document.getElementById('progress-label').textContent=l;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function clearError(){document.getElementById('error-container').innerHTML='';}
@@ -238,14 +341,19 @@ function showPartialBanner(loaded,failed){document.getElementById('partial-banne
 function closeModal(){document.getElementById('modal-container').innerHTML='';}
 function showModal(title,sub,content){document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="modal-close" onclick="closeModal()">Close</button><div class="modal-title">${title}</div><div class="modal-sub">${sub}</div><div class="modal-body" id="modal-body">${content}</div></div></div>`;}
 
-// Map status string → CSS class suffix
 function statusClass(s){
   const map={'Not Started':'not-started','Contacted':'contacted','Responded':'responded','Qualified':'qualified','Sprint Proposed':'sprint-proposed','In Negotiation':'in-negotiation','Client':'client','Not Interested':'not-interested','No Response':'no-response'};
   return map[s]||'not-started';
 }
 
-async function callClaude(messages,maxTokens=1000){const resp=await fetch(CLAUDE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})});if(!resp.ok)throw new Error(`Claude API ${resp.status}`);const data=await resp.json();return data.content?.find(b=>b.type==='text')?.text||'';}
+async function callClaude(messages,maxTokens=1000){
+  const resp=await fetch(CLAUDE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})});
+  if(!resp.ok)throw new Error(`Claude API ${resp.status}`);
+  const data=await resp.json();
+  return data.content?.find(b=>b.type==='text')?.text||'';
+}
 
+// ── RUN BRIEF ──
 async function runBrief(retryOnly){
   if(isRunning)return;isRunning=true;clearError();clearPartialBanner();
   const btn=document.getElementById('run-btn');btn.disabled=true;btn.textContent='Running...';
@@ -260,6 +368,8 @@ async function runBrief(retryOnly){
       const data=await resp.json();
       validLeads=data.filter(l=>l.firstName&&l.lastName&&l.company);
       if(!validLeads.length)throw new Error('No leads returned.');
+      document.getElementById('leads-count-sub').textContent=`${validLeads.length} leads across 4 clusters — powered by Claude`;
+      document.getElementById('m-total').textContent=validLeads.length;
       setProgress(15,`Loaded ${validLeads.length} leads. Starting research...`);
     }catch(err){
       document.getElementById('progress-wrap').style.display='none';
@@ -283,10 +393,6 @@ async function runBrief(retryOnly){
   document.getElementById('progress-wrap').style.display='none';
   if(failedBatches.length)showPartialBanner(allLeads.length,failedBatches.flat().length);
   document.getElementById('last-run').textContent=`Last run: ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
-  document.getElementById('m-total').textContent=allLeads.length;
-
-  // Show status filter row now that data is loaded
-  document.getElementById('status-filter-row').style.display='flex';
   renderLeads();
   isRunning=false;btn.disabled=false;btn.textContent='Run daily brief';
 }
@@ -297,7 +403,7 @@ async function researchBatch(leads,stream){
   const tw={'24h':'last 24 hours','30d':'last 30 days','90d':'last 90 days','120d':'last 4 months','365d':'last 12 months'}[stream]||'last 30 days';
   const prompt=`You are an intelligence analyst for Tropoly, a B2B brand strategy and GTM consulting firm. Tropoly works with founders and CEOs in complex industries: cybersecurity, cleantech, energy, mining, industrial B2B, insurtech, proptech. Core offering: "Positioning Sprint" — 2-week fixed-scope engagement.\n\nFor each lead: 1) 1-2 sentence summary 2) engagementScore: hot/warm/cold 3) 2-4 signal tags 4) hasAlert:true only for major events in ${tw}.\n\nLeads:\n${leads.map((l,i)=>`${i+1}. ${l.firstName} ${l.lastName} — ${l.title} at ${l.company} (${l.cluster})`).join('\n')}\n\nJSON array only:\n[{"index":1,"summary":"...","engagementScore":"hot"|"warm"|"cold","signals":["..."],"hasAlert":false,"alertText":""}]`;
   const text=await callClaude([{role:'user',content:prompt}]);
-  const results=JSON.parse(text.replace(/\`\`\`json|\`\`\`/g,'').trim());
+  const results=JSON.parse(text.replace(/```json|```/g,'').trim());
   return leads.map((l,i)=>{const r=results.find(x=>x.index===i+1)||{};return{...l,summary:r.summary||`${l.title} at ${l.company}.`,engagementScore:r.engagementScore||'cold',signals:r.signals||[],hasAlert:r.hasAlert||false,alertText:r.alertText||''};});
 }
 
@@ -313,60 +419,74 @@ async function deepDive(company,cluster){
   catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
 }
 
-// Sort order for pipeline status
+// ── STATUS SORT ORDER ──
 const STATUS_ORDER={'Client':0,'In Negotiation':1,'Sprint Proposed':2,'Qualified':3,'Responded':4,'Contacted':5,'Not Started':6,'No Response':7,'Not Interested':8};
 
+// ── RENDER ──
 function renderLeads(){
+  if(!allLeads.length) return;
+
   const search=(document.getElementById('search-box').value||'').toLowerCase();
   const stream=document.getElementById('stream-select').value;
 
   let filtered=allLeads.filter(l=>{
-    if(currentCluster!=='all'&&l.cluster!==currentCluster)return false;
-    if(currentStatusFilter!=='all'&&(l.pipelineStatus||'Not Started')!==currentStatusFilter)return false;
-    if(search&&!`${l.firstName} ${l.lastName} ${l.company} ${l.title}`.toLowerCase().includes(search))return false;
-    if(stream==='24h'&&!l.hasAlert)return false;
+    // Signal filter (from metric cards)
+    if(filters.signal==='hot' && l.engagementScore!=='hot') return false;
+    if(filters.signal==='warm' && l.engagementScore!=='warm') return false;
+    if(filters.signal==='alerts' && !l.hasAlert) return false;
+    // Stream filter
+    if(stream==='24h' && !l.hasAlert) return false;
+    // Cluster filter
+    if(filters.cluster!=='all' && l.cluster!==filters.cluster) return false;
+    // Status filter
+    if(filters.status!=='all' && (l.pipelineStatus||'Not Started')!==filters.status) return false;
+    // Search
+    if(search && !`${l.firstName} ${l.lastName} ${l.company} ${l.title}`.toLowerCase().includes(search)) return false;
     return true;
   });
 
-  // Apply sort
+  // Sort
   filtered.sort((a,b)=>{
-    if(currentSort==='signal'||currentSort==='signal-rev'){
-      const scoreMap={hot:0,warm:1,cold:2};
-      const diff=(scoreMap[a.engagementScore]??2)-(scoreMap[b.engagementScore]??2);
-      return currentSort==='signal'?diff:-diff;
-    }
-    if(currentSort==='status'){
-      return (STATUS_ORDER[a.pipelineStatus||'Not Started']??6)-(STATUS_ORDER[b.pipelineStatus||'Not Started']??6);
-    }
-    if(currentSort==='alpha'){
-      return (a.company||'').localeCompare(b.company||'');
-    }
+    if(filters.sort==='signal') return ({hot:0,warm:1,cold:2}[a.engagementScore]??2)-({hot:0,warm:1,cold:2}[b.engagementScore]??2);
+    if(filters.sort==='signal-rev') return ({hot:0,warm:1,cold:2}[b.engagementScore]??2)-({hot:0,warm:1,cold:2}[a.engagementScore]??2);
+    if(filters.sort==='status') return (STATUS_ORDER[a.pipelineStatus||'Not Started']??6)-(STATUS_ORDER[b.pipelineStatus||'Not Started']??6);
+    if(filters.sort==='alpha') return (a.company||'').localeCompare(b.company||'');
     return 0;
   });
 
+  // Update metrics
+  document.getElementById('m-total').textContent=allLeads.length;
   document.getElementById('m-hot').textContent=allLeads.filter(l=>l.engagementScore==='hot').length||'—';
   document.getElementById('m-warm').textContent=allLeads.filter(l=>l.engagementScore==='warm').length||'—';
   document.getElementById('m-alerts').textContent=allLeads.filter(l=>l.hasAlert).length||'—';
-  document.getElementById('leads-header').textContent=`Intelligence feed (${filtered.length} leads)`;
 
+  // Active filter summary
+  const parts=[];
+  if(filters.signal) parts.push(filters.signal==='alerts'?'red alerts':`${filters.signal} signals`);
+  if(filters.cluster!=='all') parts.push(filters.cluster.split(' ')[0]);
+  if(filters.status!=='all') parts.push(filters.status);
+  const filterSummary = parts.length ? ` · Filtered: ${parts.join(' + ')}` : '';
+  document.getElementById('leads-header').textContent=`Intelligence feed (${filtered.length} leads${filterSummary})`;
+
+  // Alerts section
   const alertLeads=allLeads.filter(l=>l.hasAlert);
   const as=document.getElementById('alerts-section');
   if(alertLeads.length){
     as.style.display='block';
-    as.innerHTML=`<div class="section-header">Red alerts</div><div class="alert-banner"><div class="alert-banner-title">⚑ ${alertLeads.length} material event${alertLeads.length>1?'s':''} detected</div>${alertLeads.map(l=>`<div class="alert-item"><div class="alert-dot"></div><div><strong>${l.firstName} ${l.lastName}</strong> · ${l.company} <span style="color:#888;font-size:12px;">— ${l.alertText}</span></div></div>`).join('')}</div>`;
+    as.innerHTML=`<div class="section-header">Red alerts</div><div class="alert-banner"><div class="alert-banner-title">⚑ ${alertLeads.length} material event${alertLeads.length>1?'s':''} detected</div>${alertLeads.map(l=>`<div class="alert-item"><div class="alert-dot"></div><div><strong>${l.firstName} ${l.lastName}</strong> · ${l.company} <span style="color:#a0aec0;font-size:11px;">— ${l.alertText}</span></div></div>`).join('')}</div>`;
   }else{as.style.display='none';}
 
-  if(!allLeads.length)return;
   if(!filtered.length){
-    document.getElementById('leads-container').innerHTML='<div class="empty-state"><div class="empty-title">No leads match</div><div class="empty-sub">Try adjusting filters.</div></div>';
+    document.getElementById('leads-container').innerHTML='<div class="empty-state"><div class="empty-title">No leads match</div><div class="empty-sub">Try adjusting your filters or <button onclick="clearAllFilters()" style="background:none;border:none;color:#00B4D8;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;">clear all filters</button>.</div></div>';
     return;
   }
 
+  const sf=s=>(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
   document.getElementById('leads-container').innerHTML=`<div class="lead-grid">${filtered.map(l=>{
     const av=avatarColor(`${l.firstName}${l.lastName}`);
-    const sc=l.engagementScore==='hot'?'#dc2626':l.engagementScore==='warm'?'#d97706':'#9ca3af';
-    const sp=l.engagementScore==='hot'?85:l.engagementScore==='warm'?50:20;
-    const sf=s=>(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const sc=l.engagementScore==='hot'?'#c53030':l.engagementScore==='warm'?'#b7791f':'#a0aec0';
+    const sp=l.engagementScore==='hot'?85:l.engagementScore==='warm'?52:20;
     const pStatus=l.pipelineStatus||'Not Started';
     const pClass=statusClass(pStatus);
     return `<div class="lead-card">
@@ -379,13 +499,13 @@ function renderLeads(){
           </div>
         </div>
         <div class="badges">
-          <span class="badge badge-${l.engagementScore}">${l.engagementScore.toUpperCase()}</span>
+          <span class="badge badge-${l.engagementScore}">${l.engagementScore}</span>
           <span class="badge badge-cluster">${(l.cluster||'').split(' ')[0]}</span>
           <span class="badge-status status-${pClass}">${pStatus}</span>
         </div>
       </div>
       <div class="lead-summary">${l.summary}</div>
-      <div class="score-bar"><span class="score-label">Tropoly fit</span><div class="score-track"><div class="score-fill" style="width:${sp}%;background:${sc};"></div></div><span class="score-pct">${sp}%</span></div>
+      <div class="score-bar"><span class="score-label">Fit score</span><div class="score-track"><div class="score-fill" style="width:${sp}%;background:${sc};"></div></div><span class="score-pct">${sp}%</span></div>
       ${l.signals&&l.signals.length?`<div class="lead-signals">${l.signals.map(s=>`<span class="signal-tag">${s}</span>`).join('')}</div>`:''}
       <div class="lead-actions">
         <button class="action-btn action-btn-primary" onclick="draftMessage('${sf(l.firstName)}','${sf(l.lastName)}','${sf(l.title)}','${sf(l.company)}','${sf(l.summary)}')">Draft message</button>
