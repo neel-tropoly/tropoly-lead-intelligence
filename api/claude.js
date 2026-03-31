@@ -10,12 +10,11 @@ export default async function handler(req, res) {
     const { model, max_tokens, messages, enableWebSearch } = req.body;
 
     const body = {
-      model: model || 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-6',
       max_tokens: max_tokens || 1000,
       messages,
     };
 
-    // Enable web search when requested (used for deep dives)
     if (enableWebSearch) {
       body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
     }
