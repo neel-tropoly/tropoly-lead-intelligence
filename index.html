@@ -126,12 +126,15 @@ select { font-family: 'Sora', sans-serif; font-size: 12px; padding: 7px 12px; bo
 .empty-sub { font-size:12px; color:#718096; }
 .spinner { display:inline-block; width:13px; height:13px; border:2px solid #e2e8f0; border-top-color:#718096; border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:7px; }
 @keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── MODAL ── */
 .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:1000; padding:24px; }
-.modal { background:#fff; border-radius:14px; padding:28px; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; }
+.modal { background:#fff; border-radius:14px; padding:28px; max-width:640px; width:100%; max-height:82vh; overflow-y:auto; }
 .modal-title { font-size:15px; font-weight:600; margin-bottom:5px; }
 .modal-sub { font-size:12px; color:#718096; margin-bottom:20px; }
-.modal-body { font-size:13px; line-height:1.75; color:#2d3748; white-space:pre-wrap; }
+.modal-body { font-size:12px; line-height:1.8; color:#2d3748; white-space:pre-wrap; }
 .modal-close { float:right; font-family:'Sora',sans-serif; font-size:11px; padding:5px 12px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; cursor:pointer; color:#718096; }
+.modal-note { font-size:10px; color:#a0aec0; margin-top:16px; padding-top:12px; border-top:1px solid #f0f2f5; }
 </style>
 </head>
 <body>
@@ -141,31 +144,12 @@ select { font-family: 'Sora', sans-serif; font-size: 12px; padding: 7px 12px; bo
   <div class="topbar-brand">
     <a class="tropoly-logo" href="https://tropoly.io" target="_blank">
       <svg id="tropoly-logo" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1200 300">
-  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
   <defs>
     <style>
-      .st0 {
-        fill: none;
-        stroke: #ffffff;
-        stroke-linecap: square;
-        stroke-linejoin: round;
-        stroke-width: 3.34px;
-      }
-
-      .st1 {
-        fill: #ffffff;
-        opacity: .56;
-      }
-
-      .st2 {
-        fill: #ffffff;
-        opacity: .9;
-      }
-
-      .st3 {
-        fill: #ffffff;
-        opacity: .24;
-      }
+      .st0 { fill: none; stroke: #ffffff; stroke-linecap: square; stroke-linejoin: round; stroke-width: 3.34px; }
+      .st1 { fill: #ffffff; opacity: .56; }
+      .st2 { fill: #ffffff; opacity: .9; }
+      .st3 { fill: #ffffff; opacity: .24; }
     </style>
   </defs>
   <g>
@@ -307,6 +291,7 @@ select { font-family: 'Sora', sans-serif; font-size: 12px; padding: 7px 12px; bo
   </div>
 </div>
 <div id="modal-container"></div>
+
 <script>
 const LEADS_API='/api/leads', CLAUDE_API='/api/claude';
 let allLeads=[], isRunning=false, failedBatches=[];
@@ -324,11 +309,8 @@ function setFilter(group,value,el){
 }
 
 function toggleMetric(type){
-  if(type==='total'){
-    filters.signal=null;
-  } else {
-    filters.signal = filters.signal===type ? null : type;
-  }
+  if(type==='total'){ filters.signal=null; }
+  else { filters.signal = filters.signal===type ? null : type; }
   ['hot','warm','alerts'].forEach(t=>{
     document.getElementById(`metric-${t}`).classList.toggle('active', filters.signal===t);
   });
@@ -357,52 +339,68 @@ function showModal(title,sub,content){document.getElementById('modal-container')
 
 function statusClass(s){const map={'Not Started':'not-started','Contacted':'contacted','Responded':'responded','Qualified':'qualified','Sprint Proposed':'sprint-proposed','In Negotiation':'in-negotiation','Client':'client','Not Interested':'not-interested','No Response':'no-response'};return map[s]||'not-started';}
 
-async function callClaude(messages,maxTokens=1000){const resp=await fetch(CLAUDE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})});if(!resp.ok)throw new Error(`Claude API ${resp.status}`);const data=await resp.json();return data.content?.find(b=>b.type==='text')?.text||'';}
+async function callClaude(messages, maxTokens=1000, enableWebSearch=false){
+  const resp = await fetch(CLAUDE_API, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      messages,
+      enableWebSearch
+    })
+  });
+  if(!resp.ok) throw new Error(`Claude API ${resp.status}`);
+  const data = await resp.json();
+  // Handle both standard text responses and web-search tool-use responses
+  const textBlocks = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text);
+  return textBlocks.join('\n') || '';
+}
 
 async function runBrief(retryOnly){
-  if(isRunning)return;isRunning=true;clearError();clearPartialBanner();
-  const btn=document.getElementById('run-btn');btn.disabled=true;btn.textContent='Running...';
+  if(isRunning)return; isRunning=true; clearError(); clearPartialBanner();
+  const btn=document.getElementById('run-btn'); btn.disabled=true; btn.textContent='Running...';
   document.getElementById('progress-wrap').style.display='block';
   let validLeads=[];
   if(!retryOnly){
-    allLeads=[];failedBatches=[];
+    allLeads=[]; failedBatches=[];
     document.getElementById('leads-container').innerHTML='<div class="empty-state"><span class="spinner"></span> Fetching lead data...</div>';
     setProgress(5,'Connecting to lead database...');
     try{
-      const resp=await fetch(LEADS_API);if(!resp.ok)throw new Error(`Server returned ${resp.status}`);
+      const resp=await fetch(LEADS_API); if(!resp.ok) throw new Error(`Server returned ${resp.status}`);
       const data=await resp.json();
       validLeads=data.filter(l=>l.firstName&&l.lastName&&l.company);
-      if(!validLeads.length)throw new Error('No leads returned.');
+      if(!validLeads.length) throw new Error('No leads returned.');
       document.getElementById('leads-count-sub').textContent=`${validLeads.length} leads across 4 clusters — powered by Claude`;
       document.getElementById('m-total').textContent=validLeads.length;
       setProgress(15,`Loaded ${validLeads.length} leads. Starting research...`);
     }catch(err){
       document.getElementById('progress-wrap').style.display='none';
       showError('Could not load lead data',err.message,[{label:'Retry',fn:'runBrief(false)',primary:true},{label:'Check /api/leads',fn:"window.open('/api/leads','_blank')"}]);
-      isRunning=false;btn.disabled=false;btn.textContent='Run daily brief';return;
+      isRunning=false; btn.disabled=false; btn.textContent='Run daily brief'; return;
     }
-  }else{validLeads=failedBatches.flat();failedBatches=[];setProgress(10,`Retrying ${validLeads.length} leads...`);}
+  }else{validLeads=failedBatches.flat(); failedBatches=[]; setProgress(10,`Retrying ${validLeads.length} leads...`);}
 
-  const batchSize=10,batches=[];
-  for(let i=0;i<validLeads.length;i+=batchSize)batches.push(validLeads.slice(i,i+batchSize));
-  const stream=document.getElementById('stream-select').value;let processed=0;
+  const batchSize=10, batches=[];
+  for(let i=0;i<validLeads.length;i+=batchSize) batches.push(validLeads.slice(i,i+batchSize));
+  const stream=document.getElementById('stream-select').value; let processed=0;
 
   for(let bi=0;bi<batches.length;bi++){
     setProgress(Math.round(15+(bi/batches.length)*80),`Researching batch ${bi+1} of ${batches.length} (${processed} done)...`);
-    try{const results=await researchBatch(batches[bi],stream);allLeads.push(...results);processed+=batches[bi].length;renderLeads();}
+    try{const results=await researchBatch(batches[bi],stream); allLeads.push(...results); processed+=batches[bi].length; renderLeads();}
     catch(e){failedBatches.push(batches[bi]);}
     await sleep(150);
   }
 
-  setProgress(100,'Complete.');await sleep(400);
+  setProgress(100,'Complete.'); await sleep(400);
   document.getElementById('progress-wrap').style.display='none';
-  if(failedBatches.length)showPartialBanner(allLeads.length,failedBatches.flat().length);
+  if(failedBatches.length) showPartialBanner(allLeads.length,failedBatches.flat().length);
   document.getElementById('last-run').textContent=`Last run: ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
   renderLeads();
-  isRunning=false;btn.disabled=false;btn.textContent='Run daily brief';
+  isRunning=false; btn.disabled=false; btn.textContent='Run daily brief';
 }
 
-async function retryFailed(){if(!failedBatches.length)return;clearPartialBanner();await runBrief(true);}
+async function retryFailed(){if(!failedBatches.length)return; clearPartialBanner(); await runBrief(true);}
 
 async function researchBatch(leads,stream){
   const tw={'24h':'last 24 hours','30d':'last 30 days','90d':'last 90 days','120d':'last 4 months','365d':'last 12 months'}[stream]||'last 30 days';
@@ -414,14 +412,91 @@ async function researchBatch(leads,stream){
 
 async function draftMessage(first,last,title,company,summary){
   showModal(`Draft — ${first} ${last}`,`${title} at ${company}`,'<span class="spinner"></span> Drafting...');
-  try{const text=await callClaude([{role:'user',content:`Draft an outbound LinkedIn message to ${first} ${last}, ${title} at ${company}. One specific observation, one direct question. No pitch, no Tropoly mention. Under 3 sentences. Context: ${summary}`}],300);document.getElementById('modal-body').textContent=text;}
-  catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
+  try{
+    const text=await callClaude([{role:'user',content:`Draft an outbound LinkedIn message to ${first} ${last}, ${title} at ${company}. One specific observation, one direct question. No pitch, no Tropoly mention. Under 3 sentences. Context: ${summary}`}],300);
+    document.getElementById('modal-body').textContent=text;
+  }catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
 }
 
 async function deepDive(company,cluster){
-  showModal(`Deep dive — ${company}`,cluster,'<span class="spinner"></span> Researching...');
-  try{const text=await callClaude([{role:'user',content:`Deep intelligence brief on ${company} for Tropoly: what they do, market position, funding, recent signals, GTM challenges, why Tropoly's Positioning Sprint is relevant now. Be specific and actionable.`}],800);document.getElementById('modal-body').textContent=text;}
-  catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
+  showModal(`Deep dive — ${company}`,cluster,'<span class="spinner"></span> Researching with live web data...');
+
+  const prompt=`You are a B2B sales intelligence researcher working for Tropoly, a brand and GTM strategy firm. Produce a verified intelligence brief on the following company for outreach purposes.
+
+RESEARCH TARGET
+- Company: ${company}
+- Cluster: ${cluster}
+
+INSTRUCTIONS
+Search the web for the following before writing anything:
+1. Company website
+2. LinkedIn (company page)
+3. Crunchbase or PitchBook
+4. Recent news (last 12 months)
+5. Press releases or product announcements
+6. G2, Capterra, or BuiltWith for tech stack signals
+7. Twitter/X or other social presence
+
+STRICT RULES
+- Only include information confirmed in search results
+- If a field cannot be verified, write: "Insufficient data found"
+- Do NOT estimate or fabricate funding rounds, ARR, team size, or customer counts
+- If the company is in stealth or pre-launch, say so explicitly
+- Flag recency of data where it matters (e.g. "as of Q1 2024")
+
+OUTPUT FORMAT
+
+## Company Snapshot
+- Status: [Active / Stealth / Pre-launch / Acquired / Insufficient data found]
+- Founded:
+- HQ:
+- Industry / Sector:
+- What they do (1-2 sentences, plain language):
+
+## Product & Market
+- Core product or service:
+- Target customer:
+- Key differentiators (only if stated publicly):
+- Competitor landscape (only name competitors with a public source):
+
+## Tech Stack & Tools
+- Known tools or platforms in use (sourced from BuiltWith, job postings, or public integrations only):
+- CRM / marketing stack signals:
+
+## Social Media Presence
+- LinkedIn (followers, posting frequency, content themes):
+- Twitter/X:
+- YouTube or podcast presence:
+- Overall assessment: [Active / Minimal / Insufficient data found]
+
+## Funding & Financial Signals
+- Total raised:
+- Last round (amount, date, lead investor):
+- Notable investors:
+
+## Recent Signals (last 12 months)
+- Hiring trends:
+- Product launches or announcements:
+- Partnerships or integrations:
+- Leadership changes:
+- Press or media coverage:
+
+## Inflection Points
+- New market entry or geographic expansion:
+- Rebrand or repositioning:
+- Major partnership or channel deal:
+- Post-funding growth push:
+- Leadership hire signaling new direction:
+
+## GTM Pain Points (Tropoly Lens)
+Identify 1-3 potential challenges this company may have with brand, positioning, go-to-market, growth strategy, or strategic planning. Derived strictly from verified information above — no speculation. If insufficient data, say so.`;
+
+  try{
+    const text=await callClaude([{role:'user',content:prompt}], 1500, true);
+    document.getElementById('modal-body').innerHTML =
+      text.replace(/\n/g,'<br>') +
+      '<div class="modal-note">Research powered by live web search. All data sourced from public information only.</div>';
+  }catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
 }
 
 const STATUS_ORDER={'Client':0,'In Negotiation':1,'Sprint Proposed':2,'Qualified':3,'Responded':4,'Contacted':5,'Not Started':6,'No Response':7,'Not Interested':8};
