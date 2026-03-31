@@ -352,7 +352,6 @@ async function callClaude(messages, maxTokens=1000, enableWebSearch=false){
   });
   if(!resp.ok) throw new Error(`Claude API ${resp.status}`);
   const data = await resp.json();
-  // Handle both standard text responses and web-search tool-use responses
   const textBlocks = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text);
   return textBlocks.join('\n') || '';
 }
@@ -362,6 +361,7 @@ async function runBrief(retryOnly){
   const btn=document.getElementById('run-btn'); btn.disabled=true; btn.textContent='Running...';
   document.getElementById('progress-wrap').style.display='block';
   let validLeads=[];
+
   if(!retryOnly){
     allLeads=[]; failedBatches=[];
     document.getElementById('leads-container').innerHTML='<div class="empty-state"><span class="spinner"></span> Fetching lead data...</div>';
@@ -379,17 +379,38 @@ async function runBrief(retryOnly){
       showError('Could not load lead data',err.message,[{label:'Retry',fn:'runBrief(false)',primary:true},{label:'Check /api/leads',fn:"window.open('/api/leads','_blank')"}]);
       isRunning=false; btn.disabled=false; btn.textContent='Run daily brief'; return;
     }
-  }else{validLeads=failedBatches.flat(); failedBatches=[]; setProgress(10,`Retrying ${validLeads.length} leads...`);}
+  } else {
+    validLeads=failedBatches.flat(); failedBatches=[];
+    setProgress(10,`Retrying ${validLeads.length} leads...`);
+  }
 
-  const batchSize=10, batches=[];
+  const batchSize=5, batches=[];
   for(let i=0;i<validLeads.length;i+=batchSize) batches.push(validLeads.slice(i,i+batchSize));
-  const stream=document.getElementById('stream-select').value; let processed=0;
+  const stream=document.getElementById('stream-select').value;
+  let processed=0;
 
   for(let bi=0;bi<batches.length;bi++){
     setProgress(Math.round(15+(bi/batches.length)*80),`Researching batch ${bi+1} of ${batches.length} (${processed} done)...`);
-    try{const results=await researchBatch(batches[bi],stream); allLeads.push(...results); processed+=batches[bi].length; renderLeads();}
-    catch(e){failedBatches.push(batches[bi]);}
-    await sleep(150);
+    try{
+      const results=await researchBatch(batches[bi],stream);
+      allLeads.push(...results);
+      processed+=batches[bi].length;
+      renderLeads();
+    } catch(e){
+      if(e.message && e.message.includes('429')){
+        setProgress(Math.round(15+(bi/batches.length)*80),`Rate limit hit — waiting before retrying batch ${bi+1}...`);
+        await sleep(8000);
+        try{
+          const results=await researchBatch(batches[bi],stream);
+          allLeads.push(...results);
+          processed+=batches[bi].length;
+          renderLeads();
+        } catch(e2){ failedBatches.push(batches[bi]); }
+      } else {
+        failedBatches.push(batches[bi]);
+      }
+    }
+    await sleep(1500);
   }
 
   setProgress(100,'Complete.'); await sleep(400);
@@ -418,24 +439,34 @@ async function draftMessage(first,last,title,company,summary){
   }catch(e){document.getElementById('modal-body').textContent='Error: '+e.message;}
 }
 
-async function deepDive(company,cluster){
+// leadName and location are passed in to anchor the web search to the correct company
+async function deepDive(company, cluster, leadName, location){
   showModal(`Deep dive — ${company}`,cluster,'<span class="spinner"></span> Researching with live web data...');
 
   const prompt=`You are a B2B sales intelligence researcher working for Tropoly, a brand and GTM strategy firm. Produce a verified intelligence brief on the following company for outreach purposes.
 
 RESEARCH TARGET
 - Company: ${company}
+- Lead: ${leadName}
+- Location: ${location || 'Unknown'}
 - Cluster: ${cluster}
+
+CRITICAL SEARCH INSTRUCTION
+You must search specifically for "${company}" associated with "${leadName}" and "${location || cluster}". 
+Do NOT research any other company with a similar name. If search results return a different company 
+(different industry, different location, different founder), disregard them and note the discrepancy.
+The lead's name and location are your primary anchors for verifying you have the correct company.
 
 INSTRUCTIONS
 Search the web for the following before writing anything:
-1. Company website
-2. LinkedIn (company page)
-3. Crunchbase or PitchBook
-4. Recent news (last 12 months)
-5. Press releases or product announcements
-6. G2, Capterra, or BuiltWith for tech stack signals
-7. Twitter/X or other social presence
+1. "${company}" + "${leadName}" (to confirm the correct company)
+2. Company website
+3. LinkedIn (company page + lead's profile)
+4. Crunchbase or PitchBook
+5. Recent news (last 12 months)
+6. Press releases or product announcements
+7. G2, Capterra, or BuiltWith for tech stack signals
+8. Twitter/X or other social presence
 
 STRICT RULES
 - Only include information confirmed in search results
@@ -492,7 +523,7 @@ OUTPUT FORMAT
 Identify 1-3 potential challenges this company may have with brand, positioning, go-to-market, growth strategy, or strategic planning. Derived strictly from verified information above — no speculation. If insufficient data, say so.`;
 
   try{
-    const text=await callClaude([{role:'user',content:prompt}], 1500, true);
+    const text=await callClaude([{role:'user',content:prompt}], 2500, true);
     document.getElementById('modal-body').innerHTML =
       text.replace(/\n/g,'<br>') +
       '<div class="modal-note">Research powered by live web search. All data sourced from public information only.</div>';
@@ -538,10 +569,15 @@ function renderLeads(){
 
   const alertLeads=allLeads.filter(l=>l.hasAlert);
   const as=document.getElementById('alerts-section');
-  if(alertLeads.length){as.style.display='block';as.innerHTML=`<div class="section-header">Red alerts</div><div class="alert-banner"><div class="alert-banner-title">⚑ ${alertLeads.length} material event${alertLeads.length>1?'s':''} detected</div>${alertLeads.map(l=>`<div class="alert-item"><div class="alert-dot"></div><div><strong>${l.firstName} ${l.lastName}</strong> · ${l.company} <span style="color:#a0aec0;font-size:11px;">— ${l.alertText}</span></div></div>`).join('')}</div>`;}
-  else{as.style.display='none';}
+  if(alertLeads.length){
+    as.style.display='block';
+    as.innerHTML=`<div class="section-header">Red alerts</div><div class="alert-banner"><div class="alert-banner-title">⚑ ${alertLeads.length} material event${alertLeads.length>1?'s':''} detected</div>${alertLeads.map(l=>`<div class="alert-item"><div class="alert-dot"></div><div><strong>${l.firstName} ${l.lastName}</strong> · ${l.company} <span style="color:#a0aec0;font-size:11px;">— ${l.alertText}</span></div></div>`).join('')}</div>`;
+  } else { as.style.display='none'; }
 
-  if(!filtered.length){document.getElementById('leads-container').innerHTML='<div class="empty-state"><div class="empty-title">No leads match</div><div class="empty-sub">Try adjusting your filters or <button onclick="clearAllFilters()" style="background:none;border:none;color:#00B4D8;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;text-decoration:underline;">clear all</button>.</div></div>';return;}
+  if(!filtered.length){
+    document.getElementById('leads-container').innerHTML='<div class="empty-state"><div class="empty-title">No leads match</div><div class="empty-sub">Try adjusting your filters or <button onclick="clearAllFilters()" style="background:none;border:none;color:#00B4D8;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;text-decoration:underline;">clear all</button>.</div></div>';
+    return;
+  }
 
   const sf=s=>(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   document.getElementById('leads-container').innerHTML=`<div class="lead-grid">${filtered.map(l=>{
@@ -550,7 +586,9 @@ function renderLeads(){
     const sp=l.engagementScore==='hot'?85:l.engagementScore==='warm'?52:20;
     const pStatus=l.pipelineStatus||'Not Started';
     const pClass=statusClass(pStatus);
-    return `<div class="lead-card"><div class="lead-top"><div class="lead-identity"><div class="avatar" style="background:${av.bg};color:${av.color};">${initials(l.firstName,l.lastName)}</div><div><div class="lead-name">${l.firstName} ${l.lastName}</div><div class="lead-meta">${l.title} · ${l.company}</div></div></div><div class="badges"><span class="badge badge-${l.engagementScore}">${l.engagementScore}</span><span class="badge badge-cluster">${(l.cluster||'').split(' ')[0]}</span><span class="badge-status status-${pClass}">${pStatus}</span></div></div><div class="lead-summary">${l.summary}</div><div class="score-bar"><span class="score-label">Fit score</span><div class="score-track"><div class="score-fill" style="width:${sp}%;background:${sc};"></div></div><span class="score-pct">${sp}%</span></div>${l.signals&&l.signals.length?`<div class="lead-signals">${l.signals.map(s=>`<span class="signal-tag">${s}</span>`).join('')}</div>`:''}<div class="lead-actions"><button class="action-btn action-btn-primary" onclick="draftMessage('${sf(l.firstName)}','${sf(l.lastName)}','${sf(l.title)}','${sf(l.company)}','${sf(l.summary)}')">Draft message</button><button class="action-btn" onclick="deepDive('${sf(l.company)}','${sf(l.cluster)}')">Deep dive</button>${l.linkedinUrl&&l.linkedinUrl.startsWith('http')?`<a href="${l.linkedinUrl}" target="_blank"><button class="action-btn">LinkedIn ↗</button></a>`:''}</div></div>`;
+    const loc=sf(l.location||l.city||'');
+    const leadName=sf(`${l.firstName} ${l.lastName}`);
+    return `<div class="lead-card"><div class="lead-top"><div class="lead-identity"><div class="avatar" style="background:${av.bg};color:${av.color};">${initials(l.firstName,l.lastName)}</div><div><div class="lead-name">${l.firstName} ${l.lastName}</div><div class="lead-meta">${l.title} · ${l.company}</div></div></div><div class="badges"><span class="badge badge-${l.engagementScore}">${l.engagementScore}</span><span class="badge badge-cluster">${(l.cluster||'').split(' ')[0]}</span><span class="badge-status status-${pClass}">${pStatus}</span></div></div><div class="lead-summary">${l.summary}</div><div class="score-bar"><span class="score-label">Fit score</span><div class="score-track"><div class="score-fill" style="width:${sp}%;background:${sc};"></div></div><span class="score-pct">${sp}%</span></div>${l.signals&&l.signals.length?`<div class="lead-signals">${l.signals.map(s=>`<span class="signal-tag">${s}</span>`).join('')}</div>`:''}<div class="lead-actions"><button class="action-btn action-btn-primary" onclick="draftMessage('${sf(l.firstName)}','${sf(l.lastName)}','${sf(l.title)}','${sf(l.company)}','${sf(l.summary)}')">Draft message</button><button class="action-btn" onclick="deepDive('${sf(l.company)}','${sf(l.cluster)}','${leadName}','${loc}')">Deep dive</button>${l.linkedinUrl&&l.linkedinUrl.startsWith('http')?`<a href="${l.linkedinUrl}" target="_blank"><button class="action-btn">LinkedIn ↗</button></a>`:''}</div></div>`;
   }).join('')}</div>`;
 }
 </script>
