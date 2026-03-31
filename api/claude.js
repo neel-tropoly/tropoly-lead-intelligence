@@ -7,25 +7,17 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { model, max_tokens, messages, enableWebSearch } = req.body;
+    const { max_tokens, messages, enableWebSearch } = req.body;
 
     const body = {
-      model: model || 'claude-sonnet-4-6',
+      model: 'claude-sonnet-4-6',
       max_tokens: max_tokens || 1000,
       messages,
     };
 
     if (enableWebSearch) {
-      body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+      body.tools = [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }];
     }
-
-    // Log what we're sending so we can see it in Vercel logs
-    console.log('Anthropic request:', JSON.stringify({
-      model: body.model,
-      max_tokens: body.max_tokens,
-      has_tools: !!body.tools,
-      message_count: messages?.length
-    }));
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -39,7 +31,6 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const err = await response.text();
-      // Log the actual Anthropic error so we can see it in Vercel logs
       console.error('Anthropic error:', response.status, err);
       return res.status(response.status).json({ error: err });
     }
